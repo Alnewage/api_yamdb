@@ -42,3 +42,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',)
+
+    def validate_username(self, value):
+        if not re.match(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                "Username must contain only letters,"
+                " numbers, and characters .@+-")
+        return value

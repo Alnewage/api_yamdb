@@ -63,7 +63,7 @@ class TokenViewSet(viewsets.ViewSet):
             return Response(
                 {'token': str(refresh.access_token)},
                 status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserProfileUpdateView(generics.UpdateAPIView):
