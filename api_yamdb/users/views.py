@@ -42,8 +42,7 @@ class RegistrationViewSet(viewsets.ViewSet):
 class TokenViewSet(viewsets.ViewSet):
     permission_classes = (AllowAny,)
 
-    @action(detail=False, methods=['post'])
-    def token(self, request):
+    def create(self, request):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -55,8 +54,7 @@ class TokenViewSet(viewsets.ViewSet):
                     confirmation_code=confirmation_code)
             except User.DoesNotExist:
                 return Response(
-                    {'error': 'Неверное имя пользователя или'
-                              ' код подтверждения'},
+                    {'error': 'Неверное имя пользователя или код подтверждения'},
                     status=status.HTTP_400_BAD_REQUEST)
 
             refresh = RefreshToken.for_user(user)
