@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 User = get_user_model()
@@ -24,6 +25,9 @@ class RegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Username must contain only letters,"
                 " numbers, and characters .@+-")
+        if value == 'me':
+            raise ValidationError(
+                {"username": "Username 'me' is not allowed."})
         return value
 
 
