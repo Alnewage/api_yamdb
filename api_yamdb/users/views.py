@@ -34,8 +34,8 @@ class RegistrationViewSet(viewsets.ViewSet):
             send_confirmation_code(email, username)
 
             # Возвращаем confirmation_code в ответе
-            return Response({'confirmation_code': confirmation_code},
-                            status=status.HTTP_201_CREATED)
+            return Response({'email': email, 'username': username,},
+                            status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

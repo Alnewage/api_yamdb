@@ -16,7 +16,7 @@ class MyUser(AbstractUser):
             username_validator
         ]
     )
-    email = models.EmailField('Email', max_length=128, unique=True, )
+    email = models.EmailField('Email', max_length=254, unique=True, )
     password = models.CharField('Пароль', max_length=128, blank=True,
                                 null=True)
     role = models.CharField(
