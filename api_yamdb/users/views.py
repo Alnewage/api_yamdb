@@ -74,14 +74,16 @@ class TokenViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileUpdateView(generics.UpdateAPIView):
+class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileUpdateSerializer
+    permission_classes = (IsOwnerOrAdminOnly,)
 
-    def get_permissions(self):
-        if self.request.method in SAFE_METHODS:
-            return (AllowAny(),)
-        return (IsOwnerOrAdminOnly(),)
+    # def get_permissions(self):
+    #     print('!'*50)
+    #     if self.request.method in SAFE_METHODS:
+    #         return (AllowAny(),)
+    #     return (IsOwnerOrAdminOnly(),)
 
     def get_object(self):
         return self.request.user
