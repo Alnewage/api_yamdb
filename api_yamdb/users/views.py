@@ -34,7 +34,7 @@ class RegistrationViewSet(viewsets.ViewSet):
             send_confirmation_code(email, username)
 
             # Возвращаем confirmation_code в ответе
-            return Response({'email': email, 'username': username,},
+            return Response({'email': email, 'username': username, },
                             status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,19 +49,20 @@ class TokenViewSet(viewsets.ViewSet):
             confirmation_code = serializer.validated_data['confirmation_code']
 
             try:
-                user = User.objects.get(
-                    username=username,
-                    confirmation_code=confirmation_code)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 return Response(
-                    {'error': 'Неверное имя пользователя или код подтверждения'},
+                    {'error': 'User does not exist'},
+                    status=status.HTTP_404_NOT_FOUND)
+            if user.confirmation_code != confirmation_code:
+                return Response(
+                    {'error': 'Confirmation code is not correct'},
                     status=status.HTTP_400_BAD_REQUEST)
-
             refresh = RefreshToken.for_user(user)
             return Response(
                 {'token': str(refresh.access_token)},
                 status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileUpdateView(generics.UpdateAPIView):
