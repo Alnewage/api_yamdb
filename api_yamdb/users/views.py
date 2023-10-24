@@ -22,6 +22,14 @@ class RegistrationViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
+            try:
+                user = User.objects.get(username=username)
+                if user.email == email:
+                    send_confirmation_code(email, username)
+                    return Response({'email': email, 'username': username, },
+                                    status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                pass
             confirmation_code = get_confirmation_code()
 
             # Сохраняем объект User.
