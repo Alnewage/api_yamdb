@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
@@ -94,3 +95,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed("Method PUT not allowed for this resource.")
+
+        return super().update(request, *args, **kwargs)
