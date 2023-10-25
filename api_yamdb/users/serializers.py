@@ -41,26 +41,12 @@ class RegistrationSerializer(serializers.Serializer):
         return data
 
 
-class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role',)
-        read_only_fields = ('role',)
-
-    def validate_username(self, value):
-        if not re.match(r'^[\w.@+-]+$', value):
-            raise serializers.ValidationError(
-                "Username must contain only letters,"
-                " numbers, and characters .@+-")
-        return value
-
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',)
+        # read_only_fields = ('role',)
 
     def validate_username(self, value):
         if not re.match(r'^[\w.@+-]+$', value):
@@ -68,3 +54,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 "Username must contain only letters,"
                 " numbers, and characters .@+-")
         return value
+
+    def validate_role(self, value):
+        user = self.context['request'].user
+        if user.role == 'admin' or user.is_superuser:
+            return value
+        raise serializers.ValidationError(
+            "You don't have permission to change the role of this user."
+        )

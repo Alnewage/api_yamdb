@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import AdminOnly, IsOwnerOrAdminOnly
 from .serializers import (RegistrationSerializer, TokenSerializer,
-                          UserProfileSerializer, UserProfileUpdateSerializer)
+                          UserProfileSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
 
 User = get_user_model()
@@ -76,13 +76,7 @@ class TokenViewSet(viewsets.ViewSet):
 
 class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserProfileUpdateSerializer
-
-    # def get_permissions(self):
-    #     print('!'*50)
-    #     if self.request.method in SAFE_METHODS:
-    #         return (AllowAny(),)
-    #     return (IsOwnerOrAdminOnly(),)
+    serializer_class = UserProfileSerializer
 
     def get_object(self):
         return self.request.user
