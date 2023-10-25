@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework import filters, generics, status, viewsets
-from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS, AllowAny
@@ -20,32 +19,43 @@ class RegistrationViewSet(viewsets.ViewSet):
 
     def create(self, request):
         serializer = RegistrationSerializer(data=request.data)
-        if serializer.is_valid():
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        else:
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
+            # Делаем проверку, что существующий пользователь вторично
+            # запрашивает свой код подтверждения.
             try:
                 user = User.objects.get(username=username)
                 if user.email == email:
                     send_confirmation_code(email, username)
-                    return Response({'email': email, 'username': username, },
-                                    status=status.HTTP_200_OK)
+                    return Response(
+                        {'email': email, 'username': username},
+                        status=status.HTTP_200_OK,
+                    )
             except User.DoesNotExist:
                 pass
+
             confirmation_code = get_confirmation_code()
 
-            # Сохраняем объект User.
             User.objects.create(
                 username=username,
                 email=email,
-                confirmation_code=confirmation_code, )
+                confirmation_code=confirmation_code,
+            )
 
             # Отправляем код подтверждения по электронной почте
             send_confirmation_code(email, username)
 
-            # Возвращаем confirmation_code в ответе
-            return Response({'email': email, 'username': username, },
-                            status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'email': email, 'username': username, },
+                status=status.HTTP_200_OK,
+            )
 
 
 class TokenViewSet(viewsets.ViewSet):

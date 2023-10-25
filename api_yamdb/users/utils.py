@@ -3,7 +3,6 @@ import string
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.shortcuts import render
 
 User = get_user_model()
 
@@ -21,7 +20,6 @@ def send_confirmation_code(email, username):
     except User.DoesNotExist:
         raise ValueError("Пользователь с таким именем не существует.")
     else:
-        # Отправка письма с confirmation_code
         subject = 'Подтверждение регистрации'
         message = (f'username: {username}\n'
                    f'Ваш код подтверждения: {confirmation_code}')
@@ -31,5 +29,4 @@ def send_confirmation_code(email, username):
         send_mail(subject, message, from_email, recipient_list,
                   fail_silently=False)
 
-    # Вернуть confirmation_code для дальнейшей проверки
     return confirmation_code
