@@ -26,6 +26,5 @@ class Title(models.Model):
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(Genre)
 
-
     def __str__(self) -> str:
         return self.name

@@ -12,5 +12,3 @@ router_v1.register(r'genres', GenreViewSet, basename='genres')
 urlpatterns = [
     path('', include(router_v1.urls))
 ]
-
-

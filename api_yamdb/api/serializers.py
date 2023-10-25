@@ -1,8 +1,5 @@
 from reviews.models import Title, Category, Genre
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-
-
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,12 +16,24 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-
 class TitleSerializer(serializers.ModelSerializer):
-    # category = serializers.SlugRelatedField(slug_field='name', queryset=Category.objects.all())
-    # genre = serializers.SlugRelatedField(slug_field='name', queryset=Genre.objects.all(), many=True)
-    
+    category = serializers.SlugRelatedField(
+        slug_field='name', queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='name', queryset=Genre.objects.all(), many=True
+    )
+    rating = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ('name', 'year', 'description', 'category', 'genre')
+        fields = ('name', 'year', 'rating', 'description', 'category', 'genre')
         model = Title
-        # read_only_field = 'rating'
+        read_only_field = 'rating'
+
+    def get_rating(self, obj):
+        titles = Genre.objects.all()
+        x = 0
+        for object in titles:
+            x += object.id
+        x = x / titles.count()
+        return x
