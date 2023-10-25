@@ -42,13 +42,18 @@ class RegistrationSerializer(serializers.Serializer):
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    bio = serializers.CharField(required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio',)
+        fields = (
+        'username', 'email', 'first_name', 'last_name', 'bio', 'role',)
+
+    def validate_username(self, value):
+        if not re.match(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                "Username must contain only letters,"
+                " numbers, and characters .@+-")
+        return value
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

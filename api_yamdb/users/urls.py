@@ -11,6 +11,6 @@ router.register(r'auth/signup', RegistrationViewSet, basename='registration')
 router.register(r'users', UserProfileViewSet, basename='user')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('users/me/', UserProfileUpdateView.as_view(), name='me'),
+    path('', include(router.urls)),
 ]

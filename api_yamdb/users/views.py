@@ -77,7 +77,6 @@ class TokenViewSet(viewsets.ViewSet):
 class UserProfileUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileUpdateSerializer
-    permission_classes = (IsOwnerOrAdminOnly,)
 
     # def get_permissions(self):
     #     print('!'*50)
