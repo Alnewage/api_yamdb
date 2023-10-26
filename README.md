@@ -1,2 +1,2 @@
-## api_yamdb
-# change this file
+# api_yamdb
+Не забыть оформить данный файл!
