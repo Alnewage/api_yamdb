@@ -1,8 +1,8 @@
-from rest_framework import mixins, permissions, viewsets, filters
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, \
-    ListCreateAPIView, DestroyAPIView
+from rest_framework import filters, permissions, viewsets
+from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.viewsets import GenericViewSet
 
+from api.permissions import AllowAnyOnlyList
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer)
 from reviews.models import Category, Genre, Title
@@ -16,7 +16,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', ]
 
 
-class CategoryViewSet(ListCreateAPIView, DestroyAPIView, GenericViewSet):
+class CategoryListCreateAPIView(ListCreateAPIView, GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -24,11 +24,31 @@ class CategoryViewSet(ListCreateAPIView, DestroyAPIView, GenericViewSet):
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
-            return (permissions.AllowAny(), )
-        return (AdminOnly(), )
+            return permissions.AllowAny(),
+        return AdminOnly(),
 
 
-class GenreViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+class CategoryDestroyAPIView(DestroyAPIView, GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+    permission_classes = AdminOnly,
+
+
+class GenreListCreateAPIView(ListCreateAPIView, GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (permissions.AllowAny, )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return AllowAnyOnlyList(),
+        return AdminOnly(),
+
+
+class GenreDestroyAPIView(DestroyAPIView, GenericViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'slug'
+    permission_classes = AdminOnly,
