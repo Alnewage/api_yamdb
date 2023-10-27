@@ -9,7 +9,10 @@ User = get_user_model()
 
 
 class ValidateUsernameMixin:
-    def validate_username(self, value):
+    """Миксин валидации имени пользователя."""
+
+    @staticmethod
+    def validate_username(value):
         if not re.match(r'^[\w.@+-]+$', value):
             raise serializers.ValidationError(
                 "Username must contain only letters, numbers,"
@@ -20,11 +23,15 @@ class ValidateUsernameMixin:
 
 
 class TokenSerializer(serializers.Serializer):
+    """Serializer для токена."""
+
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
 
 class RegistrationSerializer(ValidateUsernameMixin, serializers.Serializer):
+    """Serializer для регистрации пользователей."""
+
     username = serializers.CharField(max_length=150, required=True)
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -52,6 +59,8 @@ class RegistrationSerializer(ValidateUsernameMixin, serializers.Serializer):
 
 class UserProfileSerializer(ValidateUsernameMixin,
                             serializers.ModelSerializer):
+    """Serializer для профиля пользователя."""
+
     class Meta:
         model = User
         fields = (
