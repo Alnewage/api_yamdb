@@ -100,6 +100,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = self.get_title()
         return title.reviews.all()
 
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed("Method PUT not allowed for this resource.")
+
+        return super().update(request, *args, **kwargs)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Comment."""
