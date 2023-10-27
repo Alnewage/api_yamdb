@@ -1,3 +1,5 @@
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, viewsets
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.viewsets import GenericViewSet
@@ -25,9 +27,18 @@ class GenreMixin:
     serializer_class = GenreSerializer
 
 
+class TitleFilter(django_filters.FilterSet):
+    genre = django_filters.CharFilter(field_name='genre__slug')
+    category = django_filters.CharFilter(field_name='category__slug')
+    name = django_filters.CharFilter(field_name='name')
+    year = django_filters.NumberFilter(field_name='year')
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
