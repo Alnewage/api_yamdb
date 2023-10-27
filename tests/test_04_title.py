@@ -232,6 +232,10 @@ class Test04TitleAPI:
             self.TITLES_DETAIL_URL_TEMPLATE.format(title_id=titles[0]['id']),
             data=update_data
         )
+        print('*'*70)
+        print(update_data)
+        print(response.json())
+        print('*'*70)
         assert response.status_code == HTTPStatus.OK, (
             'Проверьте, что PATCH-запрос администратора к '
             f'`{self.TITLES_DETAIL_URL_TEMPLATE}` возвращает ответ со '

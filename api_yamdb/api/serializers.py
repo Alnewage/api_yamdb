@@ -6,14 +6,12 @@ from reviews.models import Category, Genre, TitleGenre, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = ('name', 'slug')
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = ('name', 'slug')
         model = Genre
@@ -66,18 +64,12 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'category', 'genre')
+        fields = (
+        'id', 'name', 'year', 'rating', 'description', 'category', 'genre')
         read_only_field = ('id', 'rating')
 
     def get_rating(self, obj):
         return None
-
-    def validate(self, data):
-        year = data.get('year')
-        if not year or year < 1888 or year > datetime.now().year:
-            raise serializers.ValidationError(
-                'Year must be greater than 1888 and less than current.')
-        return data
 
     def create(self, validated_data):
         genre_data = validated_data.pop('genre', [])
