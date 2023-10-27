@@ -24,14 +24,14 @@ class Title(models.Model):
         Category, on_delete=models.SET_NULL, null=True, default=None
     )
     description = models.TextField(null=True, blank=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
+    genre = models.ManyToManyField(Genre, through='TitleGenre')
 
     def __str__(self):
         return self.name
 
 
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+class TitleGenre(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE,)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
