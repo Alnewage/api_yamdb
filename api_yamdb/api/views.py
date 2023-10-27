@@ -7,7 +7,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.viewsets import GenericViewSet
 
-from api.permissions import IsOwnerOrReadOnly
+from api.permissions import IsOwnerAdminModeratorOrReadOnly
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer)
@@ -87,7 +87,7 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     lookup_url_kwarg = 'review_id'
-    permission_classes = IsOwnerOrReadOnly,
+    permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
     def get_title(self):
         title_id = self.kwargs.get('title_id')
@@ -105,7 +105,7 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 class CommentViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
-    permission_classes = IsOwnerOrReadOnly,
+    permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
