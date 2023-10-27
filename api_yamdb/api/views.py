@@ -15,6 +15,13 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from users.permissions import AdminOnly
 
 
+class MethodPutDeniedMixin:
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed("Method PUT not allowed for this resource.")
+        return super().update(request, *args, **kwargs)
+
+
 class PermissionsMixin:
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -39,7 +46,7 @@ class TitleFilter(django_filters.FilterSet):
     year = django_filters.NumberFilter(field_name='year')
 
 
-class TitleViewSet(viewsets.ModelViewSet):
+class TitleViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -49,12 +56,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in permissions.SAFE_METHODS:
             return permissions.AllowAny(),
         return AdminOnly(),
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            raise MethodNotAllowed("Method PUT not allowed for this resource.")
-
-        return super().update(request, *args, **kwargs)
 
 
 class CategoryListCreateAPIView(CategoryMixin, PermissionsMixin,
@@ -82,15 +83,15 @@ class GenreDestroyAPIView(GenreMixin, DestroyAPIView, GenericViewSet):
     permission_classes = AdminOnly,
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели Review."""
+class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerOrReadOnly,
 
     def get_title(self):
-        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title_id = self.kwargs.get('title_id')
+        return get_object_or_404(Title, pk=title_id)
 
     def perform_create(self, serializer):
         title = self.get_title()
@@ -100,21 +101,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = self.get_title()
         return title.reviews.all()
 
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            raise MethodNotAllowed("Method PUT not allowed for this resource.")
 
-        return super().update(request, *args, **kwargs)
-
-
-class CommentViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели Comment."""
+class CommentViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
     permission_classes = IsOwnerOrReadOnly,
 
     def perform_create(self, serializer):
-        """Создание нового коммента."""
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         review_id = self.kwargs.get('review_id')
@@ -122,15 +115,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
     def get_queryset(self):
-        """Получение кверисета."""
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title)
         return Comment.objects.filter(review=review)
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            raise MethodNotAllowed("Method PUT not allowed for this resource.")
-
-        return super().update(request, *args, **kwargs)
