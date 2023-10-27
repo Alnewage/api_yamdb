@@ -1,6 +1,7 @@
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, viewsets
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.viewsets import GenericViewSet
 
@@ -44,6 +45,12 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in permissions.SAFE_METHODS:
             return permissions.AllowAny(),
         return AdminOnly(),
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed("Method PUT not allowed for this resource.")
+
+        return super().update(request, *args, **kwargs)
 
 
 class CategoryListCreateAPIView(CategoryMixin, PermissionsMixin,
