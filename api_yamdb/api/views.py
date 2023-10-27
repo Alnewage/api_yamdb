@@ -89,11 +89,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = 'reviews_id'
     permission_classes = IsOwnerOrReadOnly,
 
-    # def get_permissions(self):
-    #     if self.request.method in permissions.SAFE_METHODS:
-    #         return permissions.AllowAny(),
-    #     return super().get_permissions()
-
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
