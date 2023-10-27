@@ -20,45 +20,29 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class CustomFieldMixin:
-    """Миксин для десериализации и сериализации."""
+class CustomRelatedField(serializers.SlugRelatedField):
+    """Кастомный сериализатор для моделей Genre и Category."""
+
+    def __init__(self, model, *args, **kwargs):
+        kwargs['slug_field'] = 'slug'
+        self.model = model
+        super().__init__(*args, **kwargs)
 
     def get_queryset(self):
-        """Метод должен быть переопределен в подклассах."""
-        raise NotImplementedError(
-            'Subclasses must implement get_queryset method.')
-
-    def to_internal_value(self, data):
-        # Десериализация: из строки в объект
-        if isinstance(data, str):
-            try:
-                return self.get_queryset().get(slug=data)
-            except self.get_queryset().model.DoesNotExist:
-                raise serializers.ValidationError('Object not found.')
-        return super().to_internal_value(data)
+        return self.model.objects.all()
 
     def to_representation(self, value):
         # Сериализация: из объекта в словарь
         return {'name': value.name, 'slug': value.slug}
 
 
-class CustomCategoryField(CustomFieldMixin, serializers.RelatedField):
-    def get_queryset(self):
-        return Category.objects.all()
-
-
-class CustomGenreField(CustomFieldMixin, serializers.RelatedField):
-    def get_queryset(self):
-        return Genre.objects.all()
-
-
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Title."""
 
-    # Применяем кастомные модели, так как данные поля имеют разные типы
+    # Применяем кастомную модель, так как данные поля имеют разные типы
     # при сериализации и десериализации.
-    genre = CustomGenreField(many=True)
-    category = CustomCategoryField()
+    genre = CustomRelatedField(model=Genre, many=True)
+    category = CustomRelatedField(model=Category)
 
     rating = serializers.SerializerMethodField()
 
