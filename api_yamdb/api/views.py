@@ -128,3 +128,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title)
         return Comment.objects.filter(review=review)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed("Method PUT not allowed for this resource.")
+
+        return super().update(request, *args, **kwargs)
