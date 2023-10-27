@@ -2,9 +2,10 @@ from django.urls import include, path
 
 from rest_framework import routers
 
-from api.views import (CategoryDestroyAPIView, CategoryListCreateAPIView,
-                       CommentViewSet, GenreDestroyAPIView,
-                       GenreListCreateAPIView, ReviewViewSet, TitleViewSet)
+from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                       ReviewViewSet, TitleViewSet)
+
+app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
 router_v1.register(r'titles',
@@ -18,17 +19,11 @@ router_v1.register(
     CommentViewSet,
     basename='comments')
 router_v1.register(r'categories',
-                   CategoryListCreateAPIView,
+                   CategoryViewSet,
                    basename='categories')
-router_v1.register(r'categories',
-                   CategoryDestroyAPIView,
-                   basename='categories-destroy')
 router_v1.register(r'genres',
-                   GenreListCreateAPIView,
+                   GenreViewSet,
                    basename='genres')
-router_v1.register(r'genres',
-                   GenreDestroyAPIView,
-                   basename='genres-destroy')
 
 urlpatterns = [
     path('', include(router_v1.urls))

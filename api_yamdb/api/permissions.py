@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+from users.permissions import AdminOnly
+
 
 class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):

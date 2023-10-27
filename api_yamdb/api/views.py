@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404
 
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from api.permissions import IsOwnerAdminModeratorOrReadOnly
@@ -58,33 +59,61 @@ class TitleViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
         return AdminOnly(),
 
 
-class CategoryListCreateAPIView(CategoryMixin, PermissionsMixin,
-                                ListCreateAPIView,
-                                GenericViewSet):
+class CategoryViewSet(viewsets.GenericViewSet,
+                      mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-
-
-class CategoryDestroyAPIView(CategoryMixin, DestroyAPIView, GenericViewSet):
     lookup_field = 'slug'
-    permission_classes = AdminOnly,
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return permissions.AllowAny(),
+        return AdminOnly(),
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GenreListCreateAPIView(GenreMixin, PermissionsMixin, ListCreateAPIView,
-                             GenericViewSet):
+class GenreViewSet(viewsets.GenericViewSet,
+                   mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-
-
-class GenreDestroyAPIView(GenreMixin, DestroyAPIView, GenericViewSet):
     lookup_field = 'slug'
-    permission_classes = AdminOnly,
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return permissions.AllowAny(),
+        return AdminOnly(),
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
-
     serializer_class = ReviewSerializer
     lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
@@ -103,7 +132,6 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
 
 class CommentViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
-
     serializer_class = CommentSerializer
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
