@@ -18,14 +18,6 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Genre
 
-    # def to_internal_value(self, data):
-    #     if isinstance(data, str):
-    #         if not Genre.objects.filter(slug=data).exists():
-    #             raise serializers.ValidationError(
-    #                 'There is no such genre.'
-    #             )
-    #         return Genre.objects.get(slug=data)
-    #     return super().to_internal_value(data)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -62,12 +54,7 @@ class TitleSerializer(serializers.ModelSerializer):
         read_only_field = ('id', 'rating')
 
     def get_rating(self, obj):
-        titles = Genre.objects.all()
-        x = 0
-        for object in titles:
-            x += object.id
-        x = x / titles.count()
-        return x
+        return None
 
     def validate(self, data):
         if not 1888 < data['year'] < datetime.now().year:
