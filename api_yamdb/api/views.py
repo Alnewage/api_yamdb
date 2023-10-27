@@ -7,6 +7,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import DestroyAPIView, ListCreateAPIView
 from rest_framework.viewsets import GenericViewSet
 
+from api.permissions import IsOwnerOrReadOnly
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer)
@@ -86,11 +87,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     lookup_url_kwarg = 'reviews_id'
+    permission_classes = IsOwnerOrReadOnly,
 
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return permissions.AllowAny(),
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.request.method in permissions.SAFE_METHODS:
+    #         return permissions.AllowAny(),
+    #     return super().get_permissions()
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
