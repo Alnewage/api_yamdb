@@ -47,70 +47,45 @@ class TitleFilter(django_filters.FilterSet):
     year = django_filters.NumberFilter(field_name='year')
 
 
-class TitleViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
+class TitleViewSet(PermissionsMixin, MethodPutDeniedMixin,
+                   viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return permissions.AllowAny(),
-        return AdminOnly(),
+
+class BaseCategoryGenreViewSet(PermissionsMixin,
+                               viewsets.GenericViewSet,
+                               mixins.ListModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin):
+    queryset = None
+    serializer_class = None
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CategoryViewSet(viewsets.GenericViewSet,
-                      mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin):
+class CategoryViewSet(BaseCategoryGenreViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return permissions.AllowAny(),
-        return AdminOnly(),
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GenreViewSet(viewsets.GenericViewSet,
-                   mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin):
+class GenreViewSet(BaseCategoryGenreViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return permissions.AllowAny(),
-        return AdminOnly(),
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
