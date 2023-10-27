@@ -8,12 +8,16 @@ User = get_user_model()
 
 
 def get_confirmation_code():
+    """Функция для генерации кода подтверждения."""
+
     return ''.join(
         random.choices(string.ascii_letters + string.digits, k=32)
     )
 
 
 def send_confirmation_code(email, username):
+    """Функция для отправки кода подтверждения."""
+
     try:
         confirmation_code = User.objects.get(
             username=username).confirmation_code
