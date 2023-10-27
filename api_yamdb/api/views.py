@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
@@ -11,45 +10,40 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              TitleSerializer)
 from api.utils import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title
-from users.permissions import AdminOnly
 
 
 class MethodPutDeniedMixin:
+    """Миксин для запрета обновления ресурса с помощью PUT."""
+
     def update(self, request, *args, **kwargs):
         if request.method == 'PUT':
             raise MethodNotAllowed("Method PUT not allowed for this resource.")
         return super().update(request, *args, **kwargs)
 
 
-class CategoryMixin:
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
-
-class GenreMixin:
-    queryset = Genre.objects.all()
-    serializer_class = GenreSerializer
-
-
 class TitleViewSet(MethodPutDeniedMixin,
                    viewsets.ModelViewSet):
+    """Вьюсет модели Title."""
+
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    permission_classes = IsAdminOrReadOnly,
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class BaseCategoryGenreViewSet(viewsets.GenericViewSet,
                                mixins.ListModelMixin,
                                mixins.CreateModelMixin,
                                mixins.DestroyModelMixin):
+    """Базовый вьюсет для модели Category и Genre."""
+
     queryset = None
     serializer_class = None
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
-    permission_classes = IsAdminOrReadOnly,
+    permission_classes = (IsAdminOrReadOnly,)
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -64,16 +58,22 @@ class BaseCategoryGenreViewSet(viewsets.GenericViewSet,
 
 
 class CategoryViewSet(BaseCategoryGenreViewSet):
+    """Вьюсет модели Category."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(BaseCategoryGenreViewSet):
+    """Вьюсет модели Genre."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
+    """Вьюсет модели Review."""
+
     serializer_class = ReviewSerializer
     lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
@@ -92,6 +92,8 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
 
 
 class CommentViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
+    """Вьюсет модели Comment."""
+
     serializer_class = CommentSerializer
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
