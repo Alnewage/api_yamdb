@@ -86,7 +86,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Review."""
 
     serializer_class = ReviewSerializer
-    lookup_url_kwarg = 'reviews_id'
+    lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerOrReadOnly,
 
     def get_title(self):
@@ -111,7 +111,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Comment."""
 
     serializer_class = CommentSerializer
-    '''permission_classes = '''
+    permission_classes = IsOwnerOrReadOnly,
 
     def perform_create(self, serializer):
         """Создание нового коммента."""
