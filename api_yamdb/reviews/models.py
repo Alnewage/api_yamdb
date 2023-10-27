@@ -81,7 +81,7 @@ class Review(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('author', 'title'),
-                name='unique_author'))
+                name='unique_author'),)
         default_related_name = 'reviews'
 
     def __str__(self):
