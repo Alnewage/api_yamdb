@@ -19,33 +19,49 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
+class CustomCategoryField(serializers.RelatedField):
+    queryset = Category.objects.all()
 
-class CategorySerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        # Десериализация: из строки в объект
+        if isinstance(data, str):
+            try:
+                return self.get_queryset().get(slug=data)
+            except Category.DoesNotExist:
+                raise serializers.ValidationError('Category not found.')
+        return super().to_internal_value(data)
 
-    class Meta:
-        fields = ('name', 'slug')
-        model = Category
+    def to_representation(self, value):
+        # Сериализация: из объекта в словарь
+        return {
+            'name': value.name,
+            'slug': value.slug,
+        }
 
-    # def to_internal_value(self, data):
-    #     if isinstance(data, str):
-    #         if not Category.objects.filter(slug=data).exists():
-    #             raise serializers.ValidationError(
-    #                 'There is no such category.'
-    #             )
-    #         return Category.objects.get(slug=data)
-    #     return super().to_internal_value(data)
+
+class CustomGenreField(serializers.RelatedField):
+    queryset = Genre.objects.all()
+
+    def to_internal_value(self, data):
+        # Десериализация: из строки в объект
+        if isinstance(data, str):
+            try:
+                return self.get_queryset().get(slug=data)
+            except Genre.DoesNotExist:
+                raise serializers.ValidationError('Genre not found.')
+        return super().to_internal_value(data)
+
+    def to_representation(self, value):
+        # Сериализация: из объекта в словарь
+        return {
+            'name': value.name,
+            'slug': value.slug,
+        }
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        many=True,
-        slug_field='slug',
-        queryset=Genre.objects.all(),
-    )
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Category.objects.all(),
-    )
+    genre = CustomGenreField(many=True)
+    category = CustomCategoryField()
     rating = serializers.SerializerMethodField()
 
     class Meta:
