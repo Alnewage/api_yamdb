@@ -1,7 +1,5 @@
 from rest_framework import permissions
 
-from users.permissions import AdminOnly
-
 
 class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -17,3 +15,13 @@ class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
         # имеет роль "admin" или "moderator".
         return any([obj.author == request.user,
                     request.user.role in ['admin', 'moderator'], ])
+
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Для остальных методов, пользователь должен быть аутентифицирован
+        # и иметь роль администратора или суперпользователя.
+        return request.user.is_authenticated and (
+            request.user.role == 'admin' or request.user.is_superuser)
