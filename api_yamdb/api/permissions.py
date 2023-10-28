@@ -17,4 +17,5 @@ class ModeratorPermission(permissions.BasePermission):
 
 
 class UserPermission(permissions.BasePermission):
+
         pass

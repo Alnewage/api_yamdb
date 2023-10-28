@@ -24,8 +24,14 @@ class CreateListDestroy(
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    # permission_classes = (permissions.AllowAny,)
-    permission_classes = (AdminPermission,)
+    # permission_classes = (AdminPermission,)
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_permissions(self):
+        if self.request.method == 'get':
+            return (permissions.AllowAny(), )
+        return (permissions.AllowAny(), )
 
 
 class CategoryViewSet(CreateListDestroy):
@@ -33,7 +39,7 @@ class CategoryViewSet(CreateListDestroy):
     serializer_class = CategorySerializer
     permission_classes = (AdminPermission,)
     lookup_field = 'slug'
-
+    
 
 class GenreViewSet(CreateListDestroy):
     queryset = Genre.objects.all()
