@@ -87,3 +87,13 @@ class UserProfileSerializer(ValidateUsernameMixin,
             return value
         raise serializers.ValidationError(
             "You don't have permission to change the role of this user.")
+
+    def validate(self, data):
+        if self.context['request'].method in ['PATCH', 'POST']:
+            if 'username' in data and not data['username']:
+                raise serializers.ValidationError(
+                    {"username": "This field is required."})
+            if 'email' in data and not data['email']:
+                raise serializers.ValidationError(
+                    {"email": "This field is required."})
+        return data
