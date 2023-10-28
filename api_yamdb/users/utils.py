@@ -11,6 +11,8 @@ User = get_user_model()
 def get_confirmation_code():
     """Функция для генерации кода подтверждения."""
 
+    # Генерируем confirmation_code для эксплуатации в продуктовой среде
+    # иначе устанавливаем значение 0.
     return ''.join(
         random.choices(string.ascii_letters + string.digits, k=32)
     ) if not settings.DEBUG else 0
