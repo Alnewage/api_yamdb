@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
-from django.apps import apps
 import csv
+
+from django.apps import apps
+from django.core.management.base import BaseCommand
 from django.db import models
+
 
 class Command(BaseCommand):
     help = 'Команда для загрузки данных из CSV в указанную модель'
@@ -28,13 +30,17 @@ class Command(BaseCommand):
                         try:
                             field_instance = model_class._meta.get_field(key)
                             if isinstance(field_instance, models.ForeignKey):
-                                # Если поле - ForeignKey, записываем значение
-                                # в поле_id в новом словаре.
-                                related_model_id = f'{key}_id'
-                                processed_row[related_model_id] = int(value)
+                                # Если поле - ForeignKey и не имеет окончания
+                                # "__id" в csv, записываем значение в поле_id
+                                # в новом словаре.
+                                if not key.endswith("_id"):
+                                    key_id = f'{key}_id'
+                                    processed_row[key_id] = int(value)
+                                else:
+                                    processed_row[key] = int(value)
                             else:
                                 processed_row[key] = value
-                        except:
+                        except (AttributeError, ValueError):
                             pass
 
                     rows_to_create.append(processed_row)
