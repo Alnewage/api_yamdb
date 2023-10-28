@@ -83,10 +83,12 @@ class UserProfileSerializer(ValidateUsernameMixin,
 
     def validate_role(self, value):
         user = self.context['request'].user
-        if user.role == 'admin' or user.is_superuser:
+        # Проверяем, является ли пользователь админом,
+        # модератором или суперпользователем.
+        if user.role in ['admin', 'moderator'] or user.is_superuser:
             return value
-        raise serializers.ValidationError(
-            "You don't have permission to change the role of this user.")
+        # Иначе игнорируем роль и возвращаем уже установленную.
+        return user.role
 
     def validate(self, data):
         if self.context['request'].method in ['PATCH', 'POST']:
