@@ -49,7 +49,7 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
-                  'description', 'category', 'genre')
+                  'description', 'genre', 'category')
         read_only_field = ('id', 'rating')
 
     @staticmethod

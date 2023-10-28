@@ -44,15 +44,30 @@ class RegistrationSerializer(ValidateUsernameMixin, serializers.Serializer):
         username = data.get('username')
         email = data.get('email')
 
+        # Проверяем существует ли пользователь.
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = None
 
-        if User.objects.filter(email=email).exists() and not user:
+        # Проверяем существует ли пользователь с таким email
+        try:
+            user_with_email = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user_with_email = None
+
+        # Если оба пользователя существуют и они не равны:
+        if user and user_with_email and user != user_with_email:
+            raise ValidationError({"username": "User already exists.",
+                                   "email": "Email already exists."})
+
+        # Если email уже используется, а само пользователь не существует:
+        if user_with_email and not user:
             raise ValidationError({"email": "Email already exists."})
+
+        # Если пользователь существует, но указанный email не его:
         if user and user.email != email:
-            raise ValidationError({"email": "Email incorrect."})
+            raise ValidationError({"username": "User already exists."})
 
         return data
 

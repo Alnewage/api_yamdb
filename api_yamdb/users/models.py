@@ -22,7 +22,7 @@ class MyUser(AbstractUser):
                             default='user',
                             max_length=9)
     bio = models.TextField('Биография', blank=True)
-    confirmation_code = models.CharField(max_length=32)
+    confirmation_code = models.CharField(max_length=32, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.username == "me":
