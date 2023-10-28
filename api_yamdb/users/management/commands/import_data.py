@@ -1,3 +1,9 @@
+"""
+Данный файл реализует импорт данных из csv-файлов в Базу данных.
+Запустите эту команду через управление командной строкой Django.
+    Например: python manage.py import_data <путь_к_файлу_CSV> <имя_модели>
+    python manage.py import_data static/data/genre_title.csv reviews.TitleGenre
+"""
 import csv
 import os
 
