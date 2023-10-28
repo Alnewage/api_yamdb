@@ -12,9 +12,11 @@ class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         # Проверяем, что пользователь является владельцем или
-        # имеет роль "admin" или "moderator".
+        # имеет роль "admin" или "moderator",
+        # или он является суперпользователем.
         return any([obj.author == request.user,
-                    request.user.role in ['admin', 'moderator'], ])
+                    request.user.role in ['admin', 'moderator'],
+                    request.user.is_superuser])
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
