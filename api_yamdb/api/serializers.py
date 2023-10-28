@@ -90,13 +90,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Review."""
 
     author = serializers.StringRelatedField(read_only=True)
-    title = serializers.SlugRelatedField(slug_field='id',
-                                         many=False,
-                                         read_only=True, )
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
     def validate(self, data):
         # Проверяем, что метод запроса является POST
