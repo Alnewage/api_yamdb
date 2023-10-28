@@ -44,7 +44,7 @@ class Title(models.Model):
                                  on_delete=models.SET_NULL,
                                  null=True,
                                  default=None)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
     genre = models.ManyToManyField(Genre, through='TitleGenre')
 
     class Meta:

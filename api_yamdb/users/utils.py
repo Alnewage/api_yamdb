@@ -1,6 +1,7 @@
 import random
 import string
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
@@ -12,7 +13,7 @@ def get_confirmation_code():
 
     return ''.join(
         random.choices(string.ascii_letters + string.digits, k=32)
-    )
+    ) if not settings.DEBUG else 0
 
 
 def send_confirmation_code(email, username):

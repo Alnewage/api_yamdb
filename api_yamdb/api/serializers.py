@@ -1,4 +1,5 @@
 from django.db.models import Avg
+from django.utils import timezone
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
@@ -58,6 +59,22 @@ class TitleSerializer(serializers.ModelSerializer):
         if obj.reviews.exists():
             return obj.reviews.aggregate(Avg('score'))['score__avg']
         return None
+
+    def validate(self, data):
+        # Проверяем, наличие обязательных полей при POST-запросе.
+        if self.context['request'].method == 'POST':
+            required_fields = ['name', 'year', 'genre', 'category']
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    raise serializers.ValidationError(
+                        f"{field.capitalize()} is required.")
+
+        # Проверяем, что год произведения не больше текущего.
+        if 'year' in data and data['year'] > timezone.now().year:
+            raise serializers.ValidationError(
+                'Year must be less than current year.')
+
+        return data
 
     def create(self, validated_data):
         genre_data = validated_data.pop('genre', [])
