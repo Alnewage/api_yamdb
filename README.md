@@ -39,17 +39,21 @@ git clone https://github.com/Alnewage/api_yamdb
 cd api_yamdb
 ```
 
-**Cоздать и активировать виртуальное окружение:**
+**Cоздать и активировать виртуальное окружение**
+
 ```
+# на Unix-подобный системах:
 python3 -m venv env
-```
-
-```
 source env/bin/activate
+python3 -m pip install --upgrade pip
+
 ```
 
 ```
-python3 -m pip install --upgrade pip
+# на Windows
+python -m venv env
+.\env\Scripts\activate
+python -m pip install --upgrade pip
 ```
 
 **Установить зависимости из файла requirements.txt:**
@@ -59,14 +63,38 @@ pip install -r requirements.txt
 
 **Выполнить миграции:**
 ```
+# на Unix-подобный системах:
 python3 manage.py migrate
+```
+
+```
+# на Windows
+python manage.py migrate
 ```
 
 **Запустить проект:**
 ```
+# на Unix-подобный системах:
 python3 manage.py runserver
 ```
 
+```
+# на Windows
+python manage.py runserver
+```
+
+### Для импорта данных в БД выполните команду:
+
+```
+# на Unix-подобный системах:
+python3 import_all_data_to_db.py
+
+# на Windows
+python import_all_data_to_db.py
+
+# находится нужно в каталоге с данным файлом или сразу же укажите путь к нему.
+
+```
 ## Примеры некоторых запросов к API:
 **Получение списка всех пользователей** Только для Администратора
 ```
