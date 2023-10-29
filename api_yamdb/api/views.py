@@ -1,5 +1,4 @@
-from functools import lru_cache
-
+from django.core.cache import cache
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -11,7 +10,7 @@ from api.permissions import IsAdminOrReadOnly, IsOwnerAdminModeratorOrReadOnly
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer)
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 
 
 class MethodPutDeniedMixin:
@@ -73,10 +72,21 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
     lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
-    @lru_cache(maxsize=None)
     def get_title(self):
         title_id = self.kwargs.get('title_id')
-        return get_object_or_404(Title, pk=title_id)
+
+        # Формирование ключа для кеширования
+        cache_key = f"title_{title_id}"
+
+        # Проверка наличия данных в кеше
+        title = cache.get(cache_key)
+        if title is None:
+            # Если данных в кеше нет, получаем и сохраняем их
+            title = get_object_or_404(Title, pk=title_id)
+            cache.set(cache_key, title,
+                      timeout=900)  # Сохранение данных в кеше на 15 минут
+
+        return title
 
     def perform_create(self, serializer):
         title = self.get_title()
@@ -93,16 +103,28 @@ class CommentViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
-    def perform_create(self, serializer):
+    def get_title_and_review(self):
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
         review_id = self.kwargs.get('review_id')
+
+        # Проверка кеша для получения данных
+        cache_key = f"title_review_cache_{title_id}_{review_id}"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return cached_data
+
+        # Если данные не найдены в кеше, получаем и сохраняем их
+        title = get_object_or_404(Title, id=title_id)
         review = get_object_or_404(Review, id=review_id, title=title)
+
+        # Сохраняем данные в кеше на 15 минут.
+        cache.set(cache_key, (title, review), timeout=900)
+        return title, review
+
+    def perform_create(self, serializer):
+        title, review = self.get_title_and_review()
         serializer.save(author=self.request.user, review=review)
 
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id, title=title)
-        return Comment.objects.filter(review=review)
+        _, review = self.get_title_and_review()
+        return review.comments.all()
