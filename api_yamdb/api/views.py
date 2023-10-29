@@ -1,15 +1,16 @@
+from functools import lru_cache
+
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, mixins, viewsets
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.response import Response
 
+from api.filters import TitleFilter
 from api.permissions import IsAdminOrReadOnly, IsOwnerAdminModeratorOrReadOnly
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer)
-from api.filters import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -72,6 +73,7 @@ class ReviewViewSet(MethodPutDeniedMixin, viewsets.ModelViewSet):
     lookup_url_kwarg = 'review_id'
     permission_classes = IsOwnerAdminModeratorOrReadOnly,
 
+    @lru_cache(maxsize=None)
     def get_title(self):
         title_id = self.kwargs.get('title_id')
         return get_object_or_404(Title, pk=title_id)
