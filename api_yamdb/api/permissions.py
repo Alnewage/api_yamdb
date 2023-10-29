@@ -3,27 +3,25 @@ from rest_framework import permissions
 
 class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        # Для остальных методов, пользователь должен быть аутентифицирован
-        return request.user and request.user.is_authenticated
+        # Или метод безопасный или пользователь аутентифицирован.
+        return request.method in permissions.SAFE_METHODS or (
+            request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        # Проверяем, что пользователь является владельцем или
-        # имеет роль "admin" или "moderator",
+        user = request.user
+        # Или метод безопасный, или пользователь является владельцем,
+        # или имеет роль "admin" или "moderator",
         # или он является суперпользователем.
-        return any([obj.author == request.user,
-                    request.user.role in ['admin', 'moderator'],
-                    request.user.is_superuser])
+        return request.method in permissions.SAFE_METHODS or (
+            obj.author == user) or user.is_superuser or (
+            user.role in [user.Role.ADMIN, user.Role.MODERATOR])
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        # Для остальных методов, пользователь должен быть аутентифицирован
-        # и иметь роль администратора или суперпользователя.
-        return request.user.is_authenticated and (
-            request.user.role == 'admin' or request.user.is_superuser)
+        user = request.user
+        # Или метод безопасный или пользователь аутентифицирован
+        # и имеет роль администратора или суперпользователя.
+        return request.method in permissions.SAFE_METHODS or (
+            user.is_authenticated and (
+                user.role == user.Role.ADMIN or user.is_superuser))

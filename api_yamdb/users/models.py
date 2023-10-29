@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -6,6 +5,11 @@ from django.db import models
 
 class MyUser(AbstractUser):
     """Класс модели для пользователя. Заменили базовую модель на свою."""
+
+    class Role(models.TextChoices):
+        USER = 'user', 'пользователь'
+        MODERATOR = 'moderator', 'модератор'
+        ADMIN = 'admin', 'админ'
 
     username = models.CharField('Имя пользователя',
                                 max_length=150,
@@ -18,8 +22,8 @@ class MyUser(AbstractUser):
                                 blank=True,
                                 null=True)
     role = models.CharField('Роль',
-                            choices=settings.ROLE_CHOICES,
-                            default='user',
+                            choices=Role.choices,
+                            default=Role.USER,
                             max_length=9)
     bio = models.TextField('Биография', blank=True)
     confirmation_code = models.CharField(max_length=32, default=0)
