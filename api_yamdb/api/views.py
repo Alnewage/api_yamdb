@@ -37,10 +37,10 @@ class TitleViewSet(MethodPutDeniedMixin,
         return queryset
 
 
-class BaseCategoryGenreViewSet(viewsets.GenericViewSet,
-                               mixins.ListModelMixin,
+class BaseCategoryGenreViewSet(mixins.ListModelMixin,
                                mixins.CreateModelMixin,
-                               mixins.DestroyModelMixin):
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
     """Базовый вьюсет для модели Category и Genre."""
 
     queryset = None
@@ -49,17 +49,6 @@ class BaseCategoryGenreViewSet(viewsets.GenericViewSet,
     search_fields = ('name',)
     lookup_field = 'slug'
     permission_classes = (IsAdminOrReadOnly,)
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CategoryViewSet(BaseCategoryGenreViewSet):
