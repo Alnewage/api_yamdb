@@ -106,6 +106,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
+
 # Internationalization
 
 LANGUAGE_CODE = 'ru-Ru'

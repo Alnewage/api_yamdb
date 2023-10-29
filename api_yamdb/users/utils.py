@@ -30,7 +30,7 @@ def send_confirmation_code(email, username):
         subject = 'Подтверждение регистрации'
         message = (f'username: {username}\n'
                    f'Ваш код подтверждения: {confirmation_code}')
-        from_email = 'noreply@example.com'
+        from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [email]
 
         send_mail(subject, message, from_email, recipient_list,
