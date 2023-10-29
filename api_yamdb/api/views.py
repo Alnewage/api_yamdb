@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from api.serializers import (
-    TitleSerializer, CategorySerializer, GenreSerializer,
+    TitleReadSerializer, TitleCreateSerializer, CategorySerializer, GenreSerializer,
 )
 from api.permissions import (
     AdminPermission, ModeratorPermission, UserPermission,
@@ -23,15 +23,22 @@ class CreateListDestroy(
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    # serializer_class = TitleCreateSerializer
     # permission_classes = (AdminPermission,)
     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('year', 'genre__slug')
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TitleCreateSerializer
+        return TitleReadSerializer
 
     def get_permissions(self):
-        if self.request.method == 'get':
+        if self.request.method == 'GET':
             return (permissions.AllowAny(), )
-        return (permissions.AllowAny(), )
+        return (AdminPermission(), )
 
 
 class CategoryViewSet(CreateListDestroy):

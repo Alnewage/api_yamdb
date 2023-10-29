@@ -17,13 +17,7 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    # category = serializers.SlugRelatedField(
-    #     slug_field='slug', queryset=Category.objects.all()
-    # )
-    # genre = serializers.SlugRelatedField(
-    #     slug_field='slug', queryset=Genre.objects.all(), many=True
-    # )
+class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True,)
     genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.SerializerMethodField(read_only=True)
@@ -32,6 +26,30 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
         model = Title
         read_only_field = ('rating', 'id',)
+
+    def get_rating(self, obj):
+        titles = Genre.objects.all()
+        x = 0
+        for object in titles:
+            x += object.id
+        x = x / titles.count()
+        return None
+
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all(), required=False
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True, required=False
+    )
+    rating = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating', 'description', 'category', 'genre')
+        model = Title
+        read_only_field = ('id', 'rating')
     
     def validate(self, data):
         if data['year'] > date.today().year:
@@ -44,33 +62,4 @@ class TitleSerializer(serializers.ModelSerializer):
         for object in titles:
             x += object.id
         x = x / titles.count()
-        return None
-
-
-
-# class TitleReadSerializer(serializers.ModelSerializer):
-#     category = serializers.SlugRelatedField(
-#         slug_field='name', queryset=Category.objects.all()
-#     )
-#     genre = serializers.SlugRelatedField(
-#         slug_field='name', queryset=Genre.objects.all(), many=True
-#     )
-#     rating = serializers.SerializerMethodField(read_only=True)
-
-#     class Meta:
-#         fields = ('name', 'year', 'rating', 'description', 'category', 'genre')
-#         model = Title
-#         read_only_field = 'rating'
-    
-#     def validate(self, data):
-#         if data['year'] > date.today().year:
-#             raise serializers.ValidationError('wrong year')
-#         return data
-
-#     def get_rating(self, obj):
-#         titles = Genre.objects.all()
-#         x = 0
-#         for object in titles:
-#             x += object.id
-#         x = x / titles.count()
-#         return x
+        return x
