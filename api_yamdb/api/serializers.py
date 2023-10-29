@@ -80,9 +80,7 @@ class TitleSerializer(serializers.ModelSerializer):
         genre_data = validated_data.pop('genre', [])
         title = Title.objects.create(**validated_data)
         # Создание связей с жанрами (ManyToMany через промежуточную модель).
-        for genre in genre_data:
-            TitleGenre.objects.create(
-                genre=genre, title=title)
+        title.genre.set(genre_data)
         return title
 
 
