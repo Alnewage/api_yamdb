@@ -2,7 +2,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-
+from django.http import Http404
 from rest_framework import serializers
 
 User = get_user_model()
@@ -28,6 +28,24 @@ class TokenSerializer(serializers.Serializer):
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
+    def validate(self, data):
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
+
+        # Проверяем существует ли пользователь.
+        user = User.objects.filter(username=username).first()
+
+        # Если существует пользователь с таким кодом подтверждения:
+        if user and user.confirmation_code == confirmation_code:
+            return data
+
+        # Если пользователь существует, но указанный код не совпадает:
+        if user and user.confirmation_code != confirmation_code:
+            raise ValidationError(
+                {"confirmation_code": "Confirmation code is wrong."})
+        # Значит такого пользователя нет.
+        raise Http404("User does not exist.")
+
 
 class RegistrationSerializer(ValidateUsernameMixin, serializers.Serializer):
     """Serializer для регистрации пользователей."""
@@ -45,16 +63,10 @@ class RegistrationSerializer(ValidateUsernameMixin, serializers.Serializer):
         email = data.get('email')
 
         # Проверяем существует ли пользователь.
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = None
+        user = User.objects.filter(username=username).first()
 
-        # Проверяем существует ли пользователь с таким email
-        try:
-            user_with_email = User.objects.get(email=email)
-        except User.DoesNotExist:
-            user_with_email = None
+        # Проверяем существует ли пользователь с таким email.
+        user_with_email = User.objects.filter(email=email).first()
 
         # Если оба пользователя существуют и они не равны:
         if user and user_with_email and user != user_with_email:
