@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -8,7 +9,7 @@ from api.permissions import IsAdminOrReadOnly, IsOwnerAdminModeratorOrReadOnly
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleSerializer)
-from api.utils import TitleFilter
+from api.filters import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -25,11 +26,15 @@ class TitleViewSet(MethodPutDeniedMixin,
                    viewsets.ModelViewSet):
     """Вьюсет модели Title."""
 
-    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
+
+    def get_queryset(self):
+        """Метод для получения QuerySet, аннотированного рейтингом."""
+        queryset = Title.objects.annotate(avg_rating=Avg('reviews__score'))
+        return queryset
 
 
 class BaseCategoryGenreViewSet(viewsets.GenericViewSet,

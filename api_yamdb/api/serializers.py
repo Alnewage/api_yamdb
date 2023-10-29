@@ -44,42 +44,27 @@ class TitleSerializer(serializers.ModelSerializer):
     # при сериализации и десериализации.
     genre = CustomRelatedField(model=Genre, many=True)
     category = CustomRelatedField(model=Category)
-
-    rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField(source='avg_rating', read_only=True,
+                                    allow_null=True)
 
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
-        read_only_field = ('id', 'rating')
+        read_only_field = ('id',)
 
     @staticmethod
-    def get_rating(obj):
-        """Получение рейтинга."""
-        if obj.reviews.exists():
-            return obj.reviews.aggregate(Avg('score'))['score__avg']
-        return None
-
-    def validate(self, data):
-        # Проверяем, наличие обязательных полей при POST-запросе.
-        if self.context['request'].method == 'POST':
-            required_fields = ['name', 'year', 'genre', 'category']
-            for field in required_fields:
-                if field not in data or not data[field]:
-                    raise serializers.ValidationError(
-                        f"{field.capitalize()} is required.")
-
+    def validate_year(value):
         # Проверяем, что год произведения не больше текущего.
-        if 'year' in data and data['year'] > timezone.now().year:
+        if value > timezone.now().year:
             raise serializers.ValidationError(
                 'Year must be less than current year.')
-
-        return data
+        return value
 
     def create(self, validated_data):
         genre_data = validated_data.pop('genre', [])
-        title = Title.objects.create(**validated_data)
-        # Создание связей с жанрами (ManyToMany через промежуточную модель).
+        title = super().create(validated_data)
+        # Установка связей с жанрами (ManyToMany через промежуточную модель)
         title.genre.set(genre_data)
         return title
 
