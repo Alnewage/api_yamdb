@@ -52,6 +52,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         read_only_field = ('id', 'rating')
     
     def validate(self, data):
+        if not 'year' in data:
+            return data
         if data['year'] > date.today().year:
             raise serializers.ValidationError('wrong year')
         return data

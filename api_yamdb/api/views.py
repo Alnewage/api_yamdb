@@ -11,6 +11,7 @@ from rest_framework import viewsets, permissions, filters
 from reviews.models import Title, Category, Genre
 from rest_framework import mixins
 from django_filters.rest_framework import DjangoFilterBackend
+from api.utils import TitleFilter
 
 
 class CreateListDestroy(
@@ -28,17 +29,19 @@ class TitleViewSet(viewsets.ModelViewSet):
     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('year', 'genre__slug')
+    filterset_class = TitleFilter
+    # filterset_fields = ('year', 'genre__slug')
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request.method in ['POST', 'PATCH',]:
             return TitleCreateSerializer
         return TitleReadSerializer
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return (permissions.AllowAny(), )
-        return (AdminPermission(), )
+        # return (AdminPermission(), )
+        return (AdminPermission(),)
 
 
 class CategoryViewSet(CreateListDestroy):
