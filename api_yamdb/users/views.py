@@ -79,18 +79,7 @@ class TokenViewSet(AllowAnyMixin, viewsets.ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
         username = serializer.validated_data['username']
-        confirmation_code = serializer.validated_data['confirmation_code']
-
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response({'error': 'User does not exist'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        if user.confirmation_code != confirmation_code:
-            return Response({'error': 'Confirmation code is not correct'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+        user = User.objects.get(username=username)
         refresh = RefreshToken.for_user(user)
         return Response({'token': str(refresh.access_token)},
                         status=status.HTTP_200_OK)
