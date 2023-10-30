@@ -97,17 +97,8 @@ class UserProfileSerializer(ValidateUsernameMixin,
         user = self.context['request'].user
         # Проверяем, является ли пользователь админом,
         # модератором или суперпользователем.
-        if user.role in ['admin', 'moderator'] or user.is_superuser:
+        if user.role in [user.Role.ADMIN,
+                         user.Role.MODERATOR] or user.is_superuser:
             return value
         # Иначе игнорируем роль и возвращаем уже установленную.
         return user.role
-
-    def validate(self, data):
-        if self.context['request'].method in ['PATCH', 'POST']:
-            if 'username' in data and not data['username']:
-                raise serializers.ValidationError(
-                    {"username": "This field is required."})
-            if 'email' in data and not data['email']:
-                raise serializers.ValidationError(
-                    {"email": "This field is required."})
-        return data
